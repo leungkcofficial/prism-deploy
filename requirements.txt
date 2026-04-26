@@ -7,6 +7,9 @@ fastapi>=0.100.0          # pydantic v2 compatible
 uvicorn[standard]>=0.20.0
 python-multipart>=0.0.9
 
+# Model hosting (download from Hugging Face Hub)
+huggingface_hub>=0.23.0
+
 # ML core
 numpy==1.26.4
 pandas==2.2.2

@@ -11,10 +11,7 @@ build/
 *.log
 .ipynb_checkpoints/
 
-# Model files — too large for regular git
-# Use setup_models.sh to populate from the development project
-# For GitHub: configure Git LFS (see .gitattributes) or host models separately
+# Trained model artefacts — hosted on Hugging Face Hub, not in git.
+# Downloaded automatically during `docker compose build` (see Dockerfile).
+# To populate locally without Docker: python download_models.py
 models/
-
-# But commit the models/ directory itself (as empty placeholder)
-!models/.gitkeep

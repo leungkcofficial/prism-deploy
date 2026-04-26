@@ -8,24 +8,31 @@ early dialysis vs conservative management and assigns patients to one of four cl
 
 ## Quick Start (Docker)
 
-The Docker image ships with all trained model artefacts baked in. No separate model download required.
+Trained models are hosted on [Hugging Face Hub](https://huggingface.co/datasets/leungkc/prism-models)
+and downloaded automatically during `docker compose build` — no manual setup needed.
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/<your-org>/prism-deploy.git
 cd prism-deploy
 
-# Build the image (≈ 10–20 min first time; RSF model is 3.6 GB)
+# 2. Build the image (downloads ~4.3 GB of models from HF on first build; cached afterwards)
 docker compose build
 
-# Start the service
+# 3. Start the service
 docker compose up
 
-# Open the clinical interface
+# 4. Open the clinical interface
 open http://localhost:8000
 ```
 
 The app is ready when the health check passes (allow ~90 s for model loading on first request).
+
+> **Offline / local use (no Docker)**
+> ```bash
+> python download_models.py          # populates models/ from HF Hub
+> uvicorn app.main:app --port 8000   # or: pip install -r requirements.txt first
+> ```
 
 ---
 
