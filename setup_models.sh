@@ -36,8 +36,23 @@ mkdir -p models/{rsf_dr,causal_forest,r_learner,acmm,subgroup}
 echo "  → RSF DR-Learner models ..."
 cp "$PRISM_RESULTS/treatment_window_comparison/window_90_models/dr_learner.pkl" \
    models/rsf_dr/dr_learner.pkl
-cp "$PRISM_RESULTS/treatment_window_comparison/window_90_models/propensity_model.pkl" \
-   models/rsf_dr/propensity_model.pkl
+
+# The propensity model is saved with a custom PropensityModel wrapper class from the
+# dev project (src.propensity_model). We extract the underlying GradientBoostingClassifier
+# so the deploy app has no dependency on the dev project's src/ package.
+echo "  → Extracting raw propensity model (removing dev-project class dependency) ..."
+PRISM_SRC="$(dirname "$PRISM_RESULTS")"
+python3 - <<PYEOF
+import sys, pickle
+sys.path.insert(0, '$PRISM_SRC')
+with open('$PRISM_RESULTS/treatment_window_comparison/window_90_models/propensity_model.pkl', 'rb') as f:
+    prop = pickle.load(f)
+# Extract underlying sklearn model (GradientBoostingClassifier)
+underlying = prop.model if hasattr(prop, 'model') else prop
+with open('models/rsf_dr/propensity_model.pkl', 'wb') as f:
+    pickle.dump(underlying, f)
+print('  Propensity model extracted OK.')
+PYEOF
 
 # Causal Forest (§2.6.2)
 echo "  → Causal Forest models (1–5 year) ..."
