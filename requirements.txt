@@ -1,5 +1,5 @@
 # PRISM MVP — Python dependencies
-# Pinned to versions used in development (Python 3.11)
+# Pinned to versions used in development (Python 3.11/3.12, NumPy 2.x)
 # Install: pip install -r requirements.txt
 
 # Web framework
@@ -10,28 +10,30 @@ python-multipart>=0.0.9
 # Model hosting (download from Hugging Face Hub)
 huggingface_hub>=0.23.0
 
-# ML core
-numpy==1.26.4
-pandas==2.2.2
-scikit-learn==1.3.2
+# ML core — pinned to match the environment used to train and save the models.
+# NumPy 2.x changed the BitGenerator pickle format; loading models saved with
+# 2.x on 1.x raises "is not a known BitGenerator module".
+numpy==2.2.5
+pandas==2.2.3
+scikit-learn==1.6.1
 
 # Survival analysis
-scikit-survival==0.22.2
-lifelines==0.28.0
+scikit-survival==0.24.1
+lifelines==0.30.0
 
 # Causal inference
-econml==0.15.1
+econml==0.16.0
 
 # Gradient boosting (propensity + ACMM)
-xgboost==2.0.3
+xgboost==3.0.2
 
 # Plotting (EDA + notebook)
-matplotlib==3.8.4
-seaborn==0.13.2
+matplotlib>=3.8.0
+seaborn>=0.13.0
 
 # Jupyter (optional, for replication notebook)
-# jupyter==1.0.0
-# ipykernel==6.29.4
+# jupyter>=1.0.0
+# ipykernel>=6.29.0
 
 # SHAP (optional, for EDA feature importance)
-# shap==0.44.0
+# shap>=0.44.0
