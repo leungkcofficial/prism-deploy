@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv
+venv/
+*.egg-info/
+dist/
+build/
+.DS_Store
+*.log
+.ipynb_checkpoints/
+
+# Model files — too large for regular git
+# Use setup_models.sh to populate from the development project
+# For GitHub: configure Git LFS (see .gitattributes) or host models separately
+models/
+
+# But commit the models/ directory itself (as empty placeholder)
+!models/.gitkeep

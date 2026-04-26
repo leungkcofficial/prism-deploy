@@ -1,0 +1,34 @@
+# PRISM MVP — Python dependencies
+# Pinned to versions used in development (Python 3.11)
+# Install: pip install -r requirements.txt
+
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# ML core
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.3.2
+
+# Survival analysis
+scikit-survival==0.22.2
+lifelines==0.28.0
+
+# Causal inference
+econml==0.15.1
+
+# Gradient boosting (propensity + ACMM)
+xgboost==2.0.3
+
+# Plotting (EDA + notebook)
+matplotlib==3.8.4
+seaborn==0.13.2
+
+# Jupyter (optional, for replication notebook)
+# jupyter==1.0.0
+# ipykernel==6.29.4
+
+# SHAP (optional, for EDA feature importance)
+# shap==0.44.0

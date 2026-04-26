@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  prism:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount local models/ directory into the container.
+      # Run ./setup_models.sh first to populate this directory.
+      - ./models:/app/models:ro
+    environment:
+      - PRISM_MODELS_DIR=/app/models
+    # RSF DR-Learner requires ~1.5 GB RAM; allow 3 GB to be safe.
+    mem_limit: 3g
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s   # allow time for model loading on first request

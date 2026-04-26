@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRISM — CKD Dialysis Decision Aid</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">⬡</div>
+  <div>
+    <h1>PRISM Clinical Decision Aid</h1>
+    <div class="subtitle">Individualised dialysis decision support · CKD Stage 5 (eGFR ≤10 mL/min/1.73m²)</div>
+  </div>
+</header>
+
+<div class="main-grid">
+
+  <!-- ── Input Panel ─────────────────────────────────────────────────────────── -->
+  <div>
+    <div class="card">
+      <div class="card-title">Patient Features</div>
+
+      <!-- DOB → Age -->
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <div class="age-display">
+          <input type="date" id="dob" onchange="computeAge()">
+          <div class="age-badge" id="age-badge">—</div>
+        </div>
+        <input type="number" id="age" placeholder="Age (years)" min="18" max="110"
+               style="margin-top:6px" oninput="syncAge()" hidden>
+      </div>
+
+      <!-- Sex -->
+      <div class="form-group">
+        <label>Sex</label>
+        <div class="sex-row">
+          <button class="sex-btn active" id="btn-male"   onclick="setSex(0)">Male</button>
+          <button class="sex-btn"        id="btn-female" onclick="setSex(1)">Female</button>
+        </div>
+        <input type="hidden" id="female" value="0">
+      </div>
+
+      <!-- Creatinine -->
+      <div class="form-group">
+        <label>Serum Creatinine <span class="unit">(µmol/L)</span></label>
+        <input type="number" id="creatinine" placeholder="e.g. 620" min="50" max="4000" step="1">
+      </div>
+
+      <!-- Haemoglobin -->
+      <div class="form-group">
+        <label>Haemoglobin <span class="unit">(g/dL)</span> <span class="optional-tag">optional</span></label>
+        <input type="number" id="haemoglobin" placeholder="e.g. 9.5 (imputed if blank)" min="2" max="25" step="0.1">
+      </div>
+
+      <!-- Phosphate -->
+      <div class="form-group">
+        <label>Phosphate <span class="unit">(mmol/L)</span> <span class="optional-tag">optional</span></label>
+        <input type="number" id="phosphate" placeholder="e.g. 1.8 (imputed if blank)" min="0.3" max="5" step="0.01">
+      </div>
+
+      <!-- CCI -->
+      <div class="form-group">
+        <div class="cci-header" onclick="toggleCCI()">
+          <span class="cci-title">Charlson Comorbidity Index</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="cci-score-pill" id="cci-pill">0</div>
+            <svg class="cci-chevron" id="cci-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cci-body" id="cci-body">
+          <div class="cci-grid" id="cci-grid">
+            <!-- Populated by JS -->
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text-muted)">
+            CCI total auto-computed. Tick all applicable conditions (use the most severe category for diabetes and malignancy).
+          </div>
+        </div>
+      </div>
+
+      <button class="predict-btn" id="predict-btn" onclick="runPrediction()">
+        <div class="spinner" id="spinner"></div>
+        <span id="btn-text">Run PRISM Analysis</span>
+      </button>
+      <a class="sample-link" href="#" onclick="loadSample();return false;">Load sample patient</a>
+    </div>
+
+    <!-- Feature guide card -->
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Feature Reference</div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse">
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:5px 0;color:var(--text-muted)">Feature</th>
+          <th style="text-align:left;padding:5px 0;color:var(--text-muted)">Window</th>
+          <th style="text-align:right;padding:5px 0;color:var(--text-muted)">Missing</th>
+        </tr>
+        <tr><td style="padding:5px 0">Age at t₀</td><td>Static</td><td style="text-align:right">0.0%</td></tr>
+        <tr><td>Sex</td><td>Static</td><td style="text-align:right">0.0%</td></tr>
+        <tr><td>Creatinine (µmol/L)</td><td>90-day lookback</td><td style="text-align:right">0.0%</td></tr>
+        <tr><td>Haemoglobin (g/dL)</td><td>90-day lookback</td><td style="text-align:right">3.2%</td></tr>
+        <tr><td>Phosphate (mmol/L)</td><td>90-day lookback</td><td style="text-align:right">25.1%</td></tr>
+        <tr style="border-top:1px solid var(--border)"><td>CCI score</td><td>5-year lookback</td><td style="text-align:right">0.0%</td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-muted)">
+        t₀ = index date = first outpatient eGFR ≤10 mL/min/1.73m².<br>
+        Missing lab values are imputed via MICE (ExtraTrees estimator).
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Results Panel ────────────────────────────────────────────────────────── -->
+  <div>
+    <!-- Empty state -->
+    <div id="empty-state">
+      <div class="empty-state">
+        <div class="empty-icon">🩺</div>
+        <p>Enter patient features and click "Run PRISM Analysis" to see individualised dialysis benefit predictions.</p>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="error-box" class="error-box" style="display:none">
+      <strong>Prediction error:</strong> <span id="error-msg"></span>
+    </div>
+
+    <!-- Results -->
+    <div id="results-panel">
+
+      <!-- Zone verdict -->
+      <div class="zone-card" id="zone-card">
+        <div class="zone-label">Clinical Zone</div>
+        <div class="zone-title" id="zone-title"></div>
+        <div class="zone-rec" id="zone-rec"></div>
+        <div class="zone-badge" id="zone-badge"></div>
+      </div>
+
+      <!-- Caveat -->
+      <div class="caveat-box" id="caveat-box" style="display:none">
+        <strong>Note:</strong> <span id="caveat-text"></span>
+      </div>
+
+      <!-- ACMM Risk -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">ACMM Baseline Risk — 1-Year All-Cause Mortality (treatment-agnostic)</div>
+        <div class="gauge-wrap">
+          <div class="gauge-bar" id="gauge-bar">
+            <div class="gauge-lo"></div>
+            <div class="gauge-hi"></div>
+            <span class="gauge-label lo">Low (&lt;30%)</span>
+            <span class="gauge-label hi">High (≥30%)</span>
+            <div class="gauge-needle" id="gauge-needle" style="left:0%"></div>
+          </div>
+          <div class="gauge-value" id="gauge-value">—</div>
+          <div class="gauge-threshold">
+            <span>0%</span><span>30% threshold</span><span>100%</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted)">
+          AUC 0.793 (QMH internal) · 0.743 (TMH external, n=6,039) · O:E 0.98
+        </div>
+      </div>
+
+      <!-- Counterfactual survival table -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">RSF DR-Learner — Counterfactual Mortality Risk (1–5 Years)</div>
+        <table class="surv-table">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>No early dialysis (A=0)</th>
+              <th>Early dialysis (A=1)</th>
+              <th>Benefit (ITE)</th>
+            </tr>
+          </thead>
+          <tbody id="surv-tbody"></tbody>
+        </table>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-muted)">
+          Negative benefit = dialysis reduces mortality. C-index 0.736 (spatial), 0.699 (external).
+        </div>
+      </div>
+
+      <!-- ITE chart + CF/RL 1-year -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">Treatment Effect (ITE) — All Models</div>
+
+        <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px">
+          RSF DR-Learner benefit per year (negative = dialysis reduces mortality)
+        </div>
+        <div class="ite-chart" id="ite-chart"></div>
+
+        <div style="margin-top:14px;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px">
+          Causal Forest &amp; R-Learner 1-year ITE (with 95% CI · honest estimation)
+        </div>
+        <div class="model-ite-grid">
+          <div class="model-ite-box">
+            <div class="model-ite-label">Causal Forest (CF)</div>
+            <div class="model-ite-val" id="cf-val">—</div>
+            <div class="model-ite-ci"  id="cf-ci">—</div>
+            <div class="sig-badge"     id="cf-sig"></div>
+          </div>
+          <div class="model-ite-box">
+            <div class="model-ite-label">R-Learner / DML (RL)</div>
+            <div class="model-ite-val" id="rl-val">—</div>
+            <div class="model-ite-ci"  id="rl-ci">—</div>
+            <div class="sig-badge"     id="rl-sig"></div>
+          </div>
+        </div>
+        <div id="overlap-div" style="margin-top:8px"></div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text-muted)">
+          CF–RL concordance: Pearson r=0.979, 100% directional agreement (n=1,631 spatial test).
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <strong>Research tool only.</strong> PRISM provides model-based estimates from observational data under causal assumptions (no unmeasured confounding, overlap, consistency) that cannot be verified. Estimates are most reliable within the propensity overlap zone [0.05, 0.95]. This tool does not replace clinical judgement, patient-clinician discussion, or guidelines-based care. Always consider functional status, patient preferences, centre capabilities, and interdisciplinary input before any treatment decision.
+      </div>
+
+    </div><!-- /results-panel -->
+  </div><!-- /right column -->
+
+</div><!-- /main-grid -->
+
+<script src="/static/app.js"></script>
+</body>
+</html>

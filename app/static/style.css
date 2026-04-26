@@ -1,0 +1,297 @@
+/* PRISM Clinical Decision Aid — Stylesheet */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --zone-a: #66BB6A;
+  --zone-b: #29B6F6;
+  --zone-c: #7E57C2;
+  --zone-d: #FFA726;
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --border: #e0e4ea;
+  --text: #1a2233;
+  --text-muted: #6b7280;
+  --red: #ef5350;
+  --green: #66bb6a;
+  --brand: #2563eb;
+  --brand-dark: #1d4ed8;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(0,0,0,.08);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────────────── */
+header {
+  background: var(--brand);
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+header h1 { font-size: 18px; font-weight: 700; }
+header .subtitle { font-size: 12px; opacity: .8; margin-top: 1px; }
+.logo { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px 40px;
+}
+
+@media (max-width: 850px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Form ────────────────────────────────────────────────────────────────────── */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.form-group label .unit { font-weight: 400; }
+input[type="date"], input[type="number"], select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  transition: border-color .15s;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--brand);
+  background: white;
+}
+.sex-row { display: flex; gap: 10px; }
+.sex-btn {
+  flex: 1; padding: 8px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--bg); cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--text-muted);
+  transition: all .15s;
+}
+.sex-btn.active { background: var(--brand); color: white; border-color: var(--brand); }
+.age-display {
+  display: flex; gap: 8px; align-items: center;
+}
+.age-display input { flex: 1; }
+.age-badge {
+  background: var(--brand); color: white; border-radius: 6px;
+  padding: 8px 12px; font-size: 14px; font-weight: 700; white-space: nowrap;
+  min-width: 70px; text-align: center;
+}
+
+/* Optional indicator */
+.optional-tag {
+  font-size: 10px; background: #f0f4ff; color: var(--brand);
+  border-radius: 4px; padding: 1px 6px; margin-left: 6px; font-weight: 500;
+}
+
+/* ── CCI Accordion ────────────────────────────────────────────────────────────  */
+.cci-header {
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; padding: 10px 0; user-select: none;
+}
+.cci-header .cci-title { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.cci-score-pill {
+  background: var(--brand); color: white; border-radius: 20px;
+  padding: 2px 12px; font-size: 13px; font-weight: 700; min-width: 42px; text-align: center;
+}
+.cci-body { display: none; }
+.cci-body.open { display: block; }
+.cci-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin-top: 8px; }
+.cci-item { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 2px 0; }
+.cci-item input[type="checkbox"] { accent-color: var(--brand); width: 14px; height: 14px; }
+.cci-item label {
+  font-size: 12px; cursor: pointer;
+  display: flex; justify-content: space-between; width: 100%;
+}
+.cci-item label .weight { color: var(--text-muted); font-size: 11px; }
+.cci-chevron { transition: transform .2s; }
+.cci-chevron.open { transform: rotate(180deg); }
+
+/* ── Predict button ──────────────────────────────────────────────────────────── */
+.predict-btn {
+  width: 100%; padding: 12px; background: var(--brand);
+  color: white; border: none; border-radius: 8px; font-size: 15px;
+  font-weight: 700; cursor: pointer; margin-top: 6px;
+  transition: background .15s, transform .1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.predict-btn:hover { background: var(--brand-dark); }
+.predict-btn:active { transform: scale(.98); }
+.predict-btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
+.spinner {
+  width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4);
+  border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Sample CSV link */
+.sample-link {
+  display: block; text-align: center; margin-top: 10px;
+  font-size: 12px; color: var(--brand); text-decoration: none;
+}
+.sample-link:hover { text-decoration: underline; }
+
+/* ── Results panel ───────────────────────────────────────────────────────────── */
+#results-panel { display: none; }
+#results-panel.visible { display: block; }
+
+.zone-card {
+  border-radius: var(--radius); padding: 20px 22px; margin-bottom: 16px;
+  border-left: 6px solid currentColor; position: relative;
+}
+.zone-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; opacity: .75; }
+.zone-title { font-size: 20px; font-weight: 800; margin: 4px 0 8px; }
+.zone-rec { font-size: 13px; line-height: 1.55; }
+.zone-badge {
+  position: absolute; top: 16px; right: 18px;
+  font-size: 36px; font-weight: 900; opacity: .18;
+}
+.caveat-box {
+  background: #fff8e1; border: 1px solid #ffe082;
+  border-radius: 6px; padding: 10px 12px; margin-bottom: 14px;
+  font-size: 12px; color: #78550a;
+}
+
+/* ── ACMM gauge ──────────────────────────────────────────────────────────────── */
+.gauge-wrap { margin-bottom: 16px; }
+.gauge-bar {
+  position: relative; height: 28px; border-radius: 6px; overflow: hidden;
+  display: flex;
+}
+.gauge-lo { background: var(--green); flex: 30; }
+.gauge-hi { background: var(--red); flex: 70; }
+.gauge-label {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 11px; font-weight: 700; color: white; pointer-events: none;
+}
+.gauge-label.lo { left: 7%; }
+.gauge-label.hi { right: 7%; }
+.gauge-needle {
+  position: absolute; top: 0; bottom: 0; width: 3px;
+  background: black; border-radius: 2px;
+  box-shadow: 0 0 0 2px white;
+  transform: translateX(-50%);
+  transition: left .5s cubic-bezier(.4,0,.2,1);
+}
+.gauge-value {
+  text-align: center; margin-top: 6px;
+  font-size: 15px; font-weight: 700;
+}
+.gauge-threshold {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--text-muted); margin-top: 2px;
+}
+
+/* ── Survival table ──────────────────────────────────────────────────────────── */
+.surv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.surv-table th {
+  background: var(--bg); text-align: center; padding: 8px 10px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--text-muted); border-bottom: 2px solid var(--border);
+}
+.surv-table td { text-align: center; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.surv-table tr:last-child td { border-bottom: none; }
+.surv-table td:first-child { font-weight: 700; text-align: left; }
+.benefit-cell { font-weight: 700; }
+.benefit-pos { color: var(--red); }
+.benefit-neg { color: var(--green); }
+
+/* ── ITE chart (CSS bars) ────────────────────────────────────────────────────── */
+.ite-chart { margin-top: 4px; }
+.ite-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.ite-yr { width: 22px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+.ite-bar-wrap { flex: 1; display: flex; align-items: center; position: relative; height: 18px; }
+.ite-zero { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #aaa; }
+.ite-bar {
+  position: absolute; height: 14px; border-radius: 3px; top: 2px;
+  transition: width .5s, left .5s;
+}
+.ite-bar.benefit { background: var(--green); right: 50%; }
+.ite-bar.harm    { background: var(--red);   left: 50%; }
+.ite-val { width: 58px; text-align: right; font-size: 12px; font-weight: 700; }
+
+/* ── CF + RL 1-year ITE ──────────────────────────────────────────────────────── */
+.model-ite-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.model-ite-box {
+  background: var(--bg); border-radius: 6px; padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+.model-ite-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+.model-ite-val { font-size: 17px; font-weight: 800; }
+.model-ite-ci  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.sig-badge {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  border-radius: 4px; padding: 1px 7px; margin-top: 4px;
+}
+.sig-yes { background: #e8f5e9; color: #2e7d32; }
+.sig-no  { background: #fff3e0; color: #e65100; }
+
+/* ── Overlap pill ────────────────────────────────────────────────────────────── */
+.overlap-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600;
+  margin-top: 10px;
+}
+.overlap-yes { background: #e8f5e9; color: #2e7d32; }
+.overlap-no  { background: #fff3e0; color: #b45309; }
+
+/* ── Disclaimer ──────────────────────────────────────────────────────────────── */
+.disclaimer {
+  font-size: 11px; color: var(--text-muted); margin-top: 12px;
+  padding: 10px 12px; background: var(--bg); border-radius: 6px;
+  border: 1px solid var(--border); line-height: 1.6;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 20px; color: var(--text-muted);
+  text-align: center;
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
+.empty-state p { font-size: 14px; max-width: 260px; }
+
+/* ── Error ────────────────────────────────────────────────────────────────────── */
+.error-box {
+  background: #fef2f2; border: 1px solid #fecaca;
+  border-radius: 8px; padding: 14px 16px; color: #dc2626; font-size: 13px;
+}

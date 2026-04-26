@@ -1,0 +1,56 @@
+# PRISM Sample Patient Data — Feature Structure Reference
+# =========================================================
+# This file contains 20 SYNTHETIC patients generated for demonstration purposes.
+# All values are fabricated and do not represent any real individuals.
+#
+# Column descriptions:
+#   patient_id         : arbitrary identifier
+#   age_years          : age at index date (t0) in years
+#   sex                : M = Male, F = Female
+#   creatinine_umol_L  : serum creatinine at t0, µmol/L (90-day lookback)
+#   haemoglobin_g_dL   : haemoglobin at t0, g/dL (90-day lookback); blank = missing
+#   phosphate_mmol_L   : phosphate at t0, mmol/L (90-day lookback); blank = missing
+#   cci_total          : Charlson Comorbidity Index total score (5-year lookback)
+#   mi                 : myocardial infarction (0/1)
+#   chf                : congestive heart failure (0/1)
+#   pvd                : peripheral vascular disease (0/1)
+#   cvd                : cerebrovascular disease (0/1)
+#   dementia           : dementia (0/1)
+#   copd               : chronic pulmonary disease (0/1)
+#   pud                : peptic ulcer disease (0/1)
+#   mild_liver         : mild liver disease (0/1)
+#   dm                 : diabetes without complications (0/1)
+#   dm_comp            : diabetes with complications (0/1)
+#   hemiplegia         : hemiplegia/paraplegia (0/1)
+#   malignancy         : any malignancy (0/1)
+#   metastatic         : metastatic cancer (0/1)
+#
+# Expected PRISM zone per patient (indicative, based on demo model):
+#   Zones A/B → Low baseline ACMM risk (<30%)
+#   Zones C/D → High baseline ACMM risk (≥30%)
+#
+# CCI hierarchy rules (enforced in frontend):
+#   dm_comp=1 supersedes dm=1 (set dm=0 when dm_comp=1)
+#   metastatic=1 supersedes malignancy=1 (set malignancy=0 when metastatic=1)
+#
+patient_id,age_years,sex,creatinine_umol_L,haemoglobin_g_dL,phosphate_mmol_L,cci_total,mi,chf,pvd,cvd,dementia,copd,pud,mild_liver,dm,dm_comp,hemiplegia,malignancy,metastatic
+P001,55,M,720,8.1,2.1,2,0,1,0,0,0,0,0,0,1,0,0,0,0
+P002,68,F,580,9.5,1.7,4,0,0,0,1,0,0,0,0,0,1,0,0,0
+P003,82,M,838,,  ,9,1,0,0,0,0,0,1,0,0,1,1,1,0
+P004,61,F,650,10.2,1.4,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+P005,74,M,710,8.8,2.3,5,1,1,0,0,0,0,0,0,0,1,0,0,0
+P006,49,F,560,11.0,1.6,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+P007,79,M,920,,  ,7,1,1,1,0,0,1,0,0,0,1,0,0,0
+P008,66,F,680,7.9,2.8,3,0,1,0,0,0,0,0,0,0,1,0,0,0
+P009,58,M,820,9.3,1.9,2,0,0,0,0,0,0,0,0,1,0,0,0,0
+P010,85,F,750,7.2,  ,8,1,1,0,1,1,0,1,0,0,1,0,0,0
+P011,72,M,640,10.5,1.5,3,0,0,1,1,0,0,0,0,0,1,0,0,0
+P012,54,F,890,8.4,3.1,2,0,1,0,0,0,0,0,0,1,0,0,0,0
+P013,77,M,710,9.1,2.0,6,1,1,1,0,0,0,0,0,0,1,0,0,0
+P014,63,F,600,10.8,1.8,1,0,0,0,0,0,0,0,0,0,0,0,1,0
+P015,88,M,980,,  ,10,1,1,1,1,1,1,1,0,0,1,1,0,0
+P016,52,F,750,9.0,2.5,2,0,0,0,0,0,1,0,0,1,0,0,0,0
+P017,70,M,820,8.6,1.3,4,0,1,0,1,0,0,0,0,0,1,0,0,0
+P018,45,F,540,11.5,1.7,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+P019,80,M,860,7.8,2.9,7,1,1,0,0,1,0,1,0,0,1,0,0,0
+P020,67,F,700,9.8,1.6,3,0,0,0,1,0,0,0,0,1,0,0,0,0
