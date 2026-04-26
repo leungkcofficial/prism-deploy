@@ -8,8 +8,9 @@ services:
       - "8000:8000"
     environment:
       - PRISM_MODELS_DIR=/app/models
-    # RSF DR-Learner loads ~2 GB into RAM; allow 4 GB headroom.
-    mem_limit: 4g
+    # RSF DR-Learner (~3.5 GB) + other models + Python overhead = ~5.5 GB peak.
+    # Requires a VPS with at least 8 GB RAM.
+    mem_limit: 6g
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]

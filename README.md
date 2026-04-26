@@ -155,7 +155,7 @@ docker run --rm -p 8000:8000 \
 
 ## Requirements
 
-- Docker ≥ 20.10 (Docker Desktop with 4 GB memory allocation recommended)
+- Docker ≥ 20.10
 - 4 GB+ free RAM for the RSF DR-Learner
 - ~5 GB disk space for the Docker image
 
