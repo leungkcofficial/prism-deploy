@@ -62,11 +62,11 @@ CONTINUOUS_18 = ["age_at_t0", "creatinine_at_t0", "hemoglobin_at_t0", "phosphate
 # Zone clinical descriptions
 _ZONES = {
     "A": (
-        "Conservative care",
+        "Continue monitoring",
         "Low baseline mortality risk (ACMM <30%) with limited predicted benefit "
-        "from early dialysis. Conservative/supportive management is appropriate. "
-        "Focus on symptom burden and quality of life. Serial monitoring of renal "
-        "function; reassess if clinical status changes.",
+        "from early dialysis. Continue close monitoring of renal function and "
+        "symptoms. Reassess if eGFR declines further, uraemic symptoms develop, "
+        "or clinical status changes.",
     ),
     "B": (
         "Early dialysis indicated",
