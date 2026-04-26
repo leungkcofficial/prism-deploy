@@ -187,11 +187,19 @@ async function runPrediction() {
     });
 
     if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.detail || "Server error");
+      let detail = `Server error (HTTP ${resp.status})`;
+      try { const err = await resp.json(); detail = err.detail || detail; } catch (_) {}
+      throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
     }
 
-    const data = await resp.json();
+    let data;
+    try {
+      data = await resp.json();
+    } catch (parseErr) {
+      // Show raw response body to help diagnose serialisation issues
+      const raw = await resp.text().catch(() => "(unreadable)");
+      throw new Error(`Response is not valid JSON. Server returned: ${raw.slice(0, 200)}`);
+    }
     renderResults(data);
     document.getElementById("results-panel").classList.add("visible");
 

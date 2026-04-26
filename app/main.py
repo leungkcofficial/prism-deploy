@@ -141,16 +141,30 @@ async def predict(patient: PatientInput):
             cr         = patient.creatinine,
             cci_flags  = patient.cci_flags,
         )
-        # Replace NaN with None for JSON serialisation
+        # Replace NaN / ±Inf with None for JSON serialisation.
+        # Python's json module serialises float('nan') as NaN and
+        # float('inf') as Infinity — both are invalid JSON tokens.
+        import math
+        import numpy as np
+
         def _clean(v):
-            if isinstance(v, float) and (v != v):  # NaN check
+            # numpy scalar → Python native first
+            if isinstance(v, np.floating):
+                v = float(v)
+            elif isinstance(v, np.integer):
+                return int(v)
+            elif isinstance(v, np.bool_):
+                return bool(v)
+            elif isinstance(v, np.ndarray):
+                return [_clean(x) for x in v.tolist()]
+            if isinstance(v, float) and not math.isfinite(v):
                 return None
             return v
 
         def _deep_clean(obj):
             if isinstance(obj, dict):
                 return {k: _deep_clean(v) for k, v in obj.items()}
-            if isinstance(obj, list):
+            if isinstance(obj, (list, tuple)):
                 return [_deep_clean(x) for x in obj]
             return _clean(obj)
 
