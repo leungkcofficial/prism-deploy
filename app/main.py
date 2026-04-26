@@ -124,10 +124,10 @@ async def predict(patient: PatientInput):
     """
     try:
         _ensure_models()
-    except FileNotFoundError as e:
+    except Exception as e:
         raise HTTPException(
             status_code=503,
-            detail=f"Model files not found: {e}. Run setup_models.sh to populate models/."
+            detail=f"Model loading failed: {e}"
         )
 
     try:
