@@ -10,7 +10,8 @@ services:
       - PRISM_MODELS_DIR=/app/models
     # RSF DR-Learner (~3.5 GB) + other models + Python overhead = ~5.5 GB peak.
     # Requires a VPS with at least 8 GB RAM.
-    mem_limit: 6g
+    # mem_limit intentionally not set: Docker cgroup memory limits are unreliable
+    # inside LXC containers (Proxmox); let the host OS manage memory instead.
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
