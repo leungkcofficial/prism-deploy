@@ -220,6 +220,9 @@ const ZONE_COLORS = { A: "#66BB6A", B: "#29B6F6", C: "#7E57C2", D: "#FFA726" };
 function renderResults(d) {
   const zone = d.zone;
 
+  // Patient-friendly RMST summary
+  renderRMST(d);
+
   // Zone card
   const zcard = document.getElementById("zone-card");
   zcard.style.borderLeftColor = ZONE_COLORS[zone];
@@ -320,4 +323,95 @@ function renderResults(d) {
       — propensity ${(d.propensity*100).toFixed(1)}%
       (${d.in_overlap ? "CF/RL estimates reliable" : "RSF fallback used for zone"})
     </div>`;
+}
+
+
+// ── RMST Patient-Friendly Summary ────────────────────────────────────────────
+
+function renderRMST(d) {
+  const el = document.getElementById("rmst-summary");
+  if (!d.rmst_diff_months || !el) return;
+
+  const months = d.rmst_diff_months;
+  const a0 = d.rmst_A0;
+  const a1 = d.rmst_A1;
+  const horizons = [0, 2, 4]; // 1y, 3y, 5y
+  const labels = ["1 year", "3 years", "5 years"];
+
+  // Headline: 5-year difference
+  const d5 = months[4];
+  const absD5 = Math.abs(d5);
+  const direction = d5 > 0 ? "longer" : "shorter";
+  let headline;
+  if (absD5 >= 1.0) {
+    headline = `~${absD5.toFixed(1)} months ${direction}`;
+  } else {
+    headline = `~${Math.round(absD5 * 30.44)} days ${direction}`;
+  }
+
+  const ciLo = d.rmst_ci_lo_months;
+  const ciHi = d.rmst_ci_hi_months;
+  const hasCi = ciLo !== null && ciHi !== null;
+
+  let rows = "";
+  horizons.forEach((idx, i) => {
+    const m0 = (a0[idx] / 30.44).toFixed(1);
+    const m1 = (a1[idx] / 30.44).toFixed(1);
+    const dm = months[idx];
+    const absDm = Math.abs(dm);
+    let diffStr;
+    if (absDm >= 1.0) {
+      diffStr = `${dm > 0 ? "+" : ""}${dm.toFixed(1)} mo`;
+    } else {
+      diffStr = `${dm > 0 ? "+" : ""}${Math.round(dm * 30.44)} days`;
+    }
+    // Add CI (only for zone A/B)
+    let ciStr = "";
+    if (hasCi && ciLo.length > idx && ciHi.length > idx) {
+      const lo = ciLo[idx], hi = ciHi[idx];
+      ciStr = `<br><span style="font-size:11px;font-weight:400;opacity:0.8">[${lo > 0 ? "+" : ""}${lo.toFixed(1)}, +${hi.toFixed(1)}] mo</span>`;
+    }
+    const diffColor = dm > 0 ? "var(--green)" : "var(--red)";
+    rows += `<tr>
+      <td style="font-weight:500">${labels[i]}</td>
+      <td>${m0} mo</td>
+      <td>${m1} mo</td>
+      <td style="color:${diffColor};font-weight:600">${diffStr}${ciStr}</td>
+    </tr>`;
+  });
+
+  // CI for headline (only for zone A/B)
+  let ciNote = "";
+  if (hasCi && ciLo.length > 4 && ciHi.length > 4) {
+    const lo5 = ciLo[4], hi5 = ciHi[4];
+    ciNote = `<div style="font-size:13px;color:var(--text-muted);margin-top:2px">95% CI: [${lo5 > 0 ? "+" : ""}${lo5.toFixed(1)}, +${hi5.toFixed(1)}] months</div>`;
+  } else {
+    ciNote = `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">(95% CI not available for RSF-based RMST)</div>`;
+  }
+
+  el.innerHTML = `
+    <div class="rmst-headline">
+      Over the next 5 years, early dialysis is associated with<br>
+      <span class="rmst-number" style="color:${d5 > 0 ? 'var(--green)' : 'var(--red)'}">
+        ${headline}
+      </span>
+      of expected life
+      ${ciNote}
+    </div>
+    <table class="rmst-table">
+      <thead>
+        <tr>
+          <th>Horizon</th>
+          <th>Without dialysis</th>
+          <th>With dialysis</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="rmst-note">
+      RMST = Restricted Mean Survival Time. These estimates reflect expected survival
+      within each horizon based on similar patients, not total life expectancy.
+    </div>`;
+  el.style.display = "block";
 }

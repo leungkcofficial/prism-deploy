@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Optional
 
 import numpy as np
+from scipy.integrate import trapezoid
 
 warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.WARNING)
@@ -207,6 +208,61 @@ def predict_rsf(X_scaled: np.ndarray) -> tuple:
     R0   = _rsf_risk(m["rsf_dr"], X_A0)
     R1   = _rsf_risk(m["rsf_dr"], X_A1)
     return R0, R1
+
+
+# ── RMST (Restricted Mean Survival Time) ─────────────────────────────────────
+
+def _compute_rmst(model, X_with_A, tau):
+    """Compute RMST = integral of S(t) from 0 to tau days."""
+    sf = model.predict_survival_function(X_with_A)[0]
+    mask = sf.x <= tau
+    t = np.concatenate([[0.0], sf.x[mask], [tau]])
+    s = np.concatenate([[1.0], sf.y[mask], [sf(tau)]])
+    return float(trapezoid(s, t))
+
+
+def compute_rmst_pair(X_scaled: np.ndarray,
+                      cf_ite=None, cf_lo=None, cf_hi=None,
+                      rl_ite=None, rl_lo=None, rl_hi=None) -> dict:
+    """
+    RMST for both treatment arms at each evaluation horizon.
+
+    RSF-based: fine-grained integration for RMST(A=0) and RMST(A=1).
+    CF+RL-based: point estimate + 95% CI for ΔRMST from same model.
+    """
+    m = load_models()
+    X_A0 = np.hstack([X_scaled, [[0.0]]])
+    X_A1 = np.hstack([X_scaled, [[1.0]]])
+    rsf = m["rsf_dr"]
+    rmst0, rmst1 = [], []
+    for tau in EVAL_TIMES:
+        rmst0.append(_compute_rmst(rsf, X_A0, float(tau)))
+        rmst1.append(_compute_rmst(rsf, X_A1, float(tau)))
+    rmst0 = np.array(rmst0)
+    rmst1 = np.array(rmst1)
+    diff = rmst1 - rmst0
+    result = dict(rmst_A0=rmst0, rmst_A1=rmst1,
+                  rmst_diff=diff, rmst_diff_months=diff / 30.44)
+
+    if cf_ite is not None and rl_ite is not None:
+        avg_ite = (np.asarray(cf_ite) + np.asarray(rl_ite)) / 2
+        avg_lo = (np.asarray(cf_lo) + np.asarray(rl_lo)) / 2
+        avg_hi = (np.asarray(cf_hi) + np.asarray(rl_hi)) / 2
+        times_full = np.concatenate([[0.0], EVAL_TIMES.astype(float)])
+        pt_days, ci_lo_days, ci_hi_days = [], [], []
+        for k in range(5):
+            t_k = times_full[:k+2]
+            ite_pt_k = np.concatenate([[0.0], avg_ite[:k+1]])
+            ite_lo_k = np.concatenate([[0.0], avg_lo[:k+1]])
+            ite_hi_k = np.concatenate([[0.0], avg_hi[:k+1]])
+            pt_days.append(float(-trapezoid(ite_pt_k, t_k)))
+            ci_lo_days.append(float(-trapezoid(ite_hi_k, t_k)))
+            ci_hi_days.append(float(-trapezoid(ite_lo_k, t_k)))
+        result["cfrl_rmst_diff_months"]  = np.array(pt_days) / 30.44
+        result["cfrl_rmst_ci_lo_months"] = np.array(ci_lo_days) / 30.44
+        result["cfrl_rmst_ci_hi_months"] = np.array(ci_hi_days) / 30.44
+
+    return result
 
 
 # ── Causal Forest ──────────────────────────────────────────────────────────────
@@ -432,6 +488,9 @@ def predict_patient(age: float, female: int, hb: float = np.nan,
     cf_ite, cf_lo, cf_hi  = predict_cf(X_scaled)
     rl_ite, rl_lo, rl_hi  = predict_rl(X_scaled)
     acmm_prob             = predict_acmm(age, female, hb, po4, cci, cr)
+    rmst                  = compute_rmst_pair(X_scaled, cf_ite=cf_ite, cf_lo=cf_lo,
+                                                       cf_hi=cf_hi, rl_ite=rl_ite,
+                                                       rl_lo=rl_lo, rl_hi=rl_hi)
     avg_ite_1y            = float((cf_ite[0] + rl_ite[0]) / 2)
     rsf_ite_1y            = float(R1[0] - R0[0])
 
@@ -466,6 +525,19 @@ def predict_patient(age: float, female: int, hb: float = np.nan,
         # Propensity
         propensity       = ps,
         in_overlap       = in_overlap,
+        # RMST (zone A/B: CF+RL with CI; zone C/D: RSF, no CI)
+        rmst_A0              = rmst["rmst_A0"].tolist(),
+        rmst_A1              = rmst["rmst_A1"].tolist(),
+        rmst_diff_days       = rmst["rmst_diff"].tolist(),
+        rmst_diff_months     = (rmst["cfrl_rmst_diff_months"].tolist()
+                                if verdict["zone"] in ("A", "B") and "cfrl_rmst_diff_months" in rmst
+                                else rmst["rmst_diff_months"].tolist()),
+        rmst_ci_lo_months    = (rmst["cfrl_rmst_ci_lo_months"].tolist()
+                                if verdict["zone"] in ("A", "B") and "cfrl_rmst_ci_lo_months" in rmst
+                                else None),
+        rmst_ci_hi_months    = (rmst["cfrl_rmst_ci_hi_months"].tolist()
+                                if verdict["zone"] in ("A", "B") and "cfrl_rmst_ci_hi_months" in rmst
+                                else None),
         # ACMM
         acmm_prob        = acmm_prob,
         acmm_risk_level  = verdict["acmm_risk_level"],

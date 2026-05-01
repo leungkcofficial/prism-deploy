@@ -20,6 +20,7 @@ scikit-learn==1.6.1
 # Survival analysis
 scikit-survival==0.24.1
 lifelines==0.30.0
+scipy==1.15.2
 
 # Causal inference
 econml==0.16.0

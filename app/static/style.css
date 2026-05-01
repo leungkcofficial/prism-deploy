@@ -290,6 +290,33 @@ input:focus, select:focus {
 .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
 .empty-state p { font-size: 14px; max-width: 260px; }
 
+/* ── RMST Patient Summary ────────────────────────────────────────────────────── */
+.rmst-card {
+  background: linear-gradient(135deg, #E3F2FD, #F3E5F5);
+  border: 1px solid #90CAF9;
+}
+.rmst-headline {
+  text-align: center; font-size: 15px; line-height: 1.6; margin-bottom: 14px;
+  color: var(--text);
+}
+.rmst-number {
+  font-size: 26px; font-weight: 700; display: inline-block; margin: 4px 0;
+}
+.rmst-table {
+  width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 10px;
+}
+.rmst-table th {
+  text-align: left; padding: 6px 10px; color: var(--text-muted);
+  border-bottom: 2px solid var(--border); font-weight: 600; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.rmst-table td {
+  padding: 6px 10px; border-bottom: 1px solid var(--border);
+}
+.rmst-note {
+  font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.5;
+}
+
 /* ── Error ────────────────────────────────────────────────────────────────────── */
 .error-box {
   background: #fef2f2; border: 1px solid #fecaca;
